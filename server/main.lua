@@ -121,7 +121,7 @@ ESX.RegisterServerCallback('az_container:buyItem', function(source, cb, itemName
             xPlayer.addInventoryItem(itemName, amount)
             cb(true)
         else
-            TriggerClientEvent('az_notify:ShowNotification', source, "~r~Vous n'avez pas assez de place.")
+            TriggerClientEvent('az_notify:ShowNotification', source, "~r~You don't have enough space.")
             cb(false)
         end
     else

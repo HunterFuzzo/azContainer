@@ -1,16 +1,16 @@
-local mainMenu = RageUI.CreateMenu("Services", "Choisissez un service")
-local shopMenu = RageUI.CreateSubMenu(mainMenu, "Epicerie", "Articles disponibles")
-local weaponMenu = RageUI.CreateSubMenu(mainMenu, "Armurier", "Composants d'armes")
-local vehicleMenu = RageUI.CreateSubMenu(mainMenu, "Mecano", "Personnalisation (Sac)")
-local customMenu = RageUI.CreateSubMenu(vehicleMenu, "Modification", "Modifier votre véhicule")
+local mainMenu = RageUI.CreateMenu("Services", "Choose a service")
+local shopMenu = RageUI.CreateSubMenu(mainMenu, "Grocery", "Available items")
+local weaponMenu = RageUI.CreateSubMenu(mainMenu, "Gunsmith", "Weapon components")
+local vehicleMenu = RageUI.CreateSubMenu(mainMenu, "Mechanic", "Customization (Bag)")
+local customMenu = RageUI.CreateSubMenu(vehicleMenu, "Modification", "Modify your vehicle")
 
-local colorMenu = RageUI.CreateSubMenu(customMenu, "Couleurs", "Primaire & Secondaire")
-local performanceMenu = RageUI.CreateSubMenu(customMenu, "Performances", "Moteur, Freins, etc.")
-local cosmeticMenu = RageUI.CreateSubMenu(customMenu, "Esthétique", "Spoiler, Pare-choc, etc.")
-local wheelsMenu = RageUI.CreateSubMenu(customMenu, "Roues", "Types de jantes")
-local tintMenu = RageUI.CreateSubMenu(customMenu, "Vitrages", "Teinte des vitres")
+local colorMenu = RageUI.CreateSubMenu(customMenu, "Colors", "Primary & Secondary")
+local performanceMenu = RageUI.CreateSubMenu(customMenu, "Performance", "Engine, Brakes, etc.")
+local cosmeticMenu = RageUI.CreateSubMenu(customMenu, "Cosmetics", "Spoiler, Bumper, etc.")
+local wheelsMenu = RageUI.CreateSubMenu(customMenu, "Wheels", "Types of rims")
+local tintMenu = RageUI.CreateSubMenu(customMenu, "Window Tint", "Windows tint")
 
-local teleporterMenu = RageUI.CreateSubMenu(mainMenu, "Teleporteur", "Destinations")
+local teleporterMenu = RageUI.CreateSubMenu(mainMenu, "Teleporter", "Destinations")
 
 local currentModVehicle = nil -- Entity or {item = "name", mods = {}}
 local isCustomizingBag = false
@@ -18,11 +18,11 @@ local bagVehicles = {}
 local previewVehicle = nil
 
 local colorsList = {0,1,2,3,4,5,6,12,27,28,38,50,90,111,120}
-local performanceLevels = {"Niveau 1", "Niveau 2", "Niveau 3", "Niveau 4"}
-local performanceLevels3 = {"Niveau 1", "Niveau 2", "Niveau 3"}
-local tintsList = {"Normal", "Noir Foncé", "Noir Clair", "Limo", "Vert", "Fumé"}
-local cosmeticOptions = {"Défaut", "Option 1", "Option 2", "Option 3"}
-local cosmeticOptions2 = {"Défaut", "Option 1", "Option 2"}
+local performanceLevels = {"Level 1", "Level 2", "Level 3", "Level 4"}
+local performanceLevels3 = {"Level 1", "Level 2", "Level 3"}
+local tintsList = {"Normal", "Dark Black", "Light Black", "Limo", "Green", "Smoked"}
+local cosmeticOptions = {"Default", "Option 1", "Option 2", "Option 3"}
+local cosmeticOptions2 = {"Default", "Option 1", "Option 2"}
 local wheelTypes = {"Sport", "Muscle", "Lowrider", "SUV", "Offroad", "Tuner", "Bike"}
 
 local function GetListIndex(list, value)
@@ -287,7 +287,7 @@ function OpenNPCMenu(npc)
 end
 
 function OpenQuantityInput()
-    AddTextEntry('FMMC_KEY_TIP8', "Quantité désirée")
+    AddTextEntry('FMMC_KEY_TIP8', "Desired quantity")
     DisplayOnscreenKeyboard(1, "FMMC_KEY_TIP8", "", "1", "", "", "", 10)
     while UpdateOnscreenKeyboard() == 0 do
         Wait(0)
@@ -315,13 +315,13 @@ Citizen.CreateThread(function()
         if RageUI.Visible(mainMenu) then
             mainMenu:IsVisible(function(Items)
                 if currentNPC.type == 'shop' then
-                    Items:AddButton("Accéder à l'épicerie", nil, {RightLabel = "→"}, function(onSelected)
+                    Items:AddButton("Access the grocery", nil, {RightLabel = "→"}, function(onSelected)
                     end, shopMenu)
                 elseif currentNPC.type == 'weapon' then
-                    Items:AddButton("Modifier mon arme", nil, {RightLabel = "→"}, function(onSelected)
+                    Items:AddButton("Modify my weapon", nil, {RightLabel = "→"}, function(onSelected)
                     end, weaponMenu)
                 elseif currentNPC.type == 'vehicle' then
-                    Items:AddButton("Personnaliser mon véhicule", nil, {RightLabel = "→"}, function(onSelected)
+                    Items:AddButton("Customize my vehicle", nil, {RightLabel = "→"}, function(onSelected)
                         if onSelected then
                             ESX.TriggerServerCallback('az_container:getVehiclesInBag', function(vehicles)
                                 bagVehicles = vehicles
@@ -329,14 +329,14 @@ Citizen.CreateThread(function()
                         end
                     end, vehicleMenu)
                 elseif currentNPC.type == 'clothing' then
-                    Items:AddButton("Changer de style", nil, {RightLabel = "→"}, function(onSelected)
+                    Items:AddButton("Change style", nil, {RightLabel = "→"}, function(onSelected)
                         if onSelected then
                             RageUI.Visible(mainMenu, false)
                             TriggerEvent('esx_skin:openSaveableMenu')
                         end
                     end)
                 elseif currentNPC.type == 'teleporter' then
-                    Items:AddButton("Se téléporter", nil, {RightLabel = "→"}, function(onSelected)
+                    Items:AddButton("Teleport", nil, {RightLabel = "→"}, function(onSelected)
                     end, teleporterMenu)
                 end
             end, function() end)
@@ -351,9 +351,9 @@ Citizen.CreateThread(function()
                             if count and count > 0 then
                                 ESX.TriggerServerCallback('az_container:buyItem', function(success)
                                     if success then
-                                        exports['az_notify']:ShowNotification("~g~Achat réussi : " .. count .. "x " .. item.label)
+                                        exports['az_notify']:ShowNotification("~g~Purchase successful : " .. count .. "x " .. item.label)
                                     else
-                                        exports['az_notify']:ShowNotification("~r~Pas assez d'argent ou de place.")
+                                        exports['az_notify']:ShowNotification("~r~Not enough money or space.")
                                     end
                                 end, item.name, item.price, count)
                             end
@@ -369,7 +369,7 @@ Citizen.CreateThread(function()
                 local weaponHash = GetSelectedPedWeapon(playerPed)
 
                 if weaponHash == `WEAPON_SNSPISTOL_MK2` then
-                    Items:AddSeparator("~r~Vous ne pouvez pas modifier cette arme.") 
+                    Items:AddSeparator("~r~You cannot modify this weapon.") 
                     return
                 end
 
@@ -393,10 +393,10 @@ Citizen.CreateThread(function()
                         end
                     end
                     if shownCount == 0 then 
-                        Items:AddSeparator("~r~Aucun composant compatible avec cette arme") 
+                        Items:AddSeparator("~r~No compatible components for this weapon") 
                     end
                 else
-                    Items:AddSeparator("~r~Sortez une arme pour la modifier")
+                    Items:AddSeparator("~r~Take out a weapon to modify it")
                 end
             end, function() end)
         end
