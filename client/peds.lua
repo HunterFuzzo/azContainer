@@ -32,7 +32,7 @@ Citizen.CreateThread(function()
     SetBlipColour(stashBlip, 5)
     SetBlipAsShortRange(stashBlip, true)
     BeginTextCommandSetBlipName("STRING")
-    AddTextComponentString("Mon Coffre")
+    AddTextComponentString("My chest")
     EndTextCommandSetBlipName(stashBlip)
 end)
 
@@ -90,7 +90,6 @@ Citizen.CreateThread(function()
                     SetEntityInvincible(ped, true)
                     FreezeEntityPosition(ped, true)
                     spawnedPeds[i] = ped
-                    print("[DEBUG] Spawned NPC: " .. npc.label .. " at " .. npc.coords.x .. ", " .. npc.coords.y)
                 end
             else
                 if spawnedPeds[i] then DeleteEntity(spawnedPeds[i]) spawnedPeds[i] = nil end

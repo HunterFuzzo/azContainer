@@ -383,6 +383,7 @@ end
 
 function RageUI.Render()
     local CurrentMenu = RageUI.CurrentMenu;
+    if CurrentMenu == nil then return end
     if CurrentMenu.Safezone then
         ResetScriptGfxAlign()
     end

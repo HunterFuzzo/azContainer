@@ -1,13 +1,6 @@
 Config = {}
 
-Config.StashLocation = {x = -441.56, y = -920.26, z = 29.39, h = 100}
-
-Config.Marker = {
-    Type = 1,
-    Size = {x = 1.0, y = 1.0, z = 0.5},
-    Color = {r = 255, g = 150, b = 0, a = 100},
-    DrawDistance = 100.0
-}
+Config.StashLocation = {x = -441.56, y = -920.26, z = 29.39, h = 30}
 
 Config.NPCs = {
     {
