@@ -301,166 +301,169 @@ end
 
 Citizen.CreateThread(function()
     while true do
-        Wait(0)
-        
-        -- Logic to cleanup preview when mecano menu is closed
-        if not RageUI.Visible(mainMenu) and not RageUI.Visible(vehicleMenu) and not RageUI.Visible(customMenu) and 
-           not RageUI.Visible(colorMenu) and not RageUI.Visible(performanceMenu) and not RageUI.Visible(cosmeticMenu) and 
-           not RageUI.Visible(wheelsMenu) and not RageUI.Visible(tintMenu) then
-            if previewVehicle then
+        local sleep = 500
+        local isAnyMenuVisible = RageUI.Visible(mainMenu) or RageUI.Visible(shopMenu) or RageUI.Visible(weaponMenu) or 
+                                 RageUI.Visible(vehicleMenu) or RageUI.Visible(customMenu) or RageUI.Visible(colorMenu) or 
+                                 RageUI.Visible(performanceMenu) or RageUI.Visible(cosmeticMenu) or RageUI.Visible(wheelsMenu) or 
+                                 RageUI.Visible(tintMenu) or RageUI.Visible(teleporterMenu)
+
+        if isAnyMenuVisible or previewVehicle then
+            sleep = 0
+            
+            -- Logic to cleanup preview when mecano menu is closed
+            if not isAnyMenuVisible and previewVehicle then
                 CleanupPreviewVehicle()
             end
-        end
 
-        if RageUI.Visible(mainMenu) then
-            mainMenu:IsVisible(function(Items)
-                if currentNPC.type == 'shop' then
-                    Items:AddButton("Access the grocery", nil, {RightLabel = "→"}, function(onSelected)
-                    end, shopMenu)
-                elseif currentNPC.type == 'weapon' then
-                    Items:AddButton("Modify my weapon", nil, {RightLabel = "→"}, function(onSelected)
-                    end, weaponMenu)
-                elseif currentNPC.type == 'vehicle' then
-                    Items:AddButton("Customize my vehicle", nil, {RightLabel = "→"}, function(onSelected)
-                        if onSelected then
-                            ESX.TriggerServerCallback('az_container:getVehiclesInBag', function(vehicles)
-                                bagVehicles = vehicles
-                            end)
-                        end
-                    end, vehicleMenu)
-                elseif currentNPC.type == 'clothing' then
-                    Items:AddButton("Change style", nil, {RightLabel = "→"}, function(onSelected)
-                        if onSelected then
-                            RageUI.Visible(mainMenu, false)
-                            TriggerEvent('esx_skin:openSaveableMenu')
-                        end
-                    end)
-                elseif currentNPC.type == 'teleporter' then
-                    Items:AddButton("Teleport", nil, {RightLabel = "→"}, function(onSelected)
-                    end, teleporterMenu)
-                end
-            end, function() end)
-        end
-
-        if RageUI.Visible(shopMenu) then
-            shopMenu:IsVisible(function(Items)
-                for _, item in ipairs(currentNPC.items or {}) do
-                    Items:AddButton(item.label, "Prix: " .. item.price .. "$/u", {RightLabel = "→"}, function(onSelected)
-                        if onSelected then
-                            local count = OpenQuantityInput()
-                            if count and count > 0 then
-                                ESX.TriggerServerCallback('az_container:buyItem', function(success)
-                                    if success then
-                                        exports['az_notify']:ShowNotification("~g~Purchase successful : " .. count .. "x " .. item.label)
-                                    else
-                                        exports['az_notify']:ShowNotification("~r~Not enough money or space.")
-                                    end
-                                end, item.name, item.price, count)
-                            end
-                        end
-                    end)
-                end
-            end, function() end)
-        end
-
-        if RageUI.Visible(weaponMenu) then
-            weaponMenu:IsVisible(function(Items)
-                local playerPed = PlayerPedId()
-                local weaponHash = GetSelectedPedWeapon(playerPed)
-
-                if weaponHash == `WEAPON_SNSPISTOL_MK2` then
-                    Items:AddSeparator("~r~You cannot modify this weapon.") 
-                    return
-                end
-
-                if weaponHash ~= `WEAPON_UNARMED` then
-                    local shownCount = 0
-                    for _, comp in ipairs(weaponAttachments) do
-                        local isCompatible = true
-                        -- Safety check: Some builds don't have this native
-                        if DoesWeaponTakeWeaponComponent then
-                             isCompatible = DoesWeaponTakeWeaponComponent(weaponHash, comp.hash)
-                        end
-
-                        if isCompatible then
-                            local hasComp = HasPedGotWeaponComponent(playerPed, weaponHash, comp.hash)
-                            Items:CheckBox(comp.label, nil, hasComp, {}, function(onSelected, IsChecked)
-                                if onSelected then
-                                    ToggleWeaponComponent(comp)
-                                end
-                            end)
-                            shownCount = shownCount + 1
-                        end
-                    end
-                    if shownCount == 0 then 
-                        Items:AddSeparator("~r~No compatible components for this weapon") 
-                    end
-                else
-                    Items:AddSeparator("~r~Take out a weapon to modify it")
-                end
-            end, function() end)
-        end
-
-        if RageUI.Visible(vehicleMenu) then
-            vehicleMenu:IsVisible(function(Items)
-                if #bagVehicles > 0 then
-                    for _, v in ipairs(bagVehicles) do
-                        Items:AddButton(v.label, "Cliquez pour modifier (Preview)", {RightLabel = "→"}, function(onSelected)
+            if RageUI.Visible(mainMenu) then
+                mainMenu:IsVisible(function(Items)
+                    if currentNPC.type == 'shop' then
+                        Items:AddButton("Access the grocery", nil, {RightLabel = "→"}, function(onSelected)
+                        end, shopMenu)
+                    elseif currentNPC.type == 'weapon' then
+                        Items:AddButton("Modify my weapon", nil, {RightLabel = "→"}, function(onSelected)
+                        end, weaponMenu)
+                    elseif currentNPC.type == 'vehicle' then
+                        Items:AddButton("Customize my vehicle", nil, {RightLabel = "→"}, function(onSelected)
                             if onSelected then
-                                currentModVehicle = v
-                                isCustomizingBag = true
-                                SpawnPreviewVehicle(v.name, v.mods)
+                                ESX.TriggerServerCallback('az_container:getVehiclesInBag', function(vehicles)
+                                    bagVehicles = vehicles
+                                end)
                             end
-                        end, customMenu)
+                        end, vehicleMenu)
+                    elseif currentNPC.type == 'clothing' then
+                        Items:AddButton("Change style", nil, {RightLabel = "→"}, function(onSelected)
+                            if onSelected then
+                                RageUI.Visible(mainMenu, false)
+                                TriggerEvent('esx_skin:openSaveableMenu')
+                            end
+                        end)
+                    elseif currentNPC.type == 'teleporter' then
+                        Items:AddButton("Teleport", nil, {RightLabel = "→"}, function(onSelected)
+                        end, teleporterMenu)
                     end
-                else
-                    Items:AddSeparator("~r~Aucun véhicule dans votre sac")
-                end
-            end, function() end)
-        end
+                end, function() end)
+            end
 
-        if RageUI.Visible(customMenu) then
-            customMenu:IsVisible(function(Items)
-                if not isCustomizingBag and not DoesEntityExist(currentModVehicle) then
-                    RageUI.GoBack()
-                    return
-                end
+            if RageUI.Visible(shopMenu) then
+                shopMenu:IsVisible(function(Items)
+                    for _, item in ipairs(currentNPC.items or {}) do
+                        Items:AddButton(item.label, "Prix: " .. item.price .. "$/u", {RightLabel = "→"}, function(onSelected)
+                            if onSelected then
+                                local count = OpenQuantityInput()
+                                if count and count > 0 then
+                                    ESX.TriggerServerCallback('az_container:buyItem', function(success)
+                                        if success then
+                                            exports['az_notify']:ShowNotification("~g~Purchase successful : " .. count .. "x " .. item.label)
+                                        else
+                                            exports['az_notify']:ShowNotification("~r~Not enough money or space.")
+                                        end
+                                    end, item.name, item.price, count)
+                                end
+                            end
+                        end)
+                    end
+                end, function() end)
+            end
 
-                Items:AddButton("Couleurs", nil, {RightLabel = "→"}, function() end, colorMenu)
-                Items:AddButton("Performances", nil, {RightLabel = "→"}, function() end, performanceMenu)
-                Items:AddButton("Esthétique", nil, {RightLabel = "→"}, function() end, cosmeticMenu)
-                Items:AddButton("Jantes", nil, {RightLabel = "→"}, function() end, wheelsMenu)
-                Items:AddButton("Vitres", nil, {RightLabel = "→"}, function() end, tintMenu)
+            if RageUI.Visible(weaponMenu) then
+                weaponMenu:IsVisible(function(Items)
+                    local playerPed = PlayerPedId()
+                    local weaponHash = GetSelectedPedWeapon(playerPed)
 
-                if not isCustomizingBag then
-                    Items:AddSeparator("~b~Actions Rapides")
-                    Items:AddButton("Réparer le véhicule", nil, {RightLabel = "→"}, function(onSelected)
-                        if onSelected then
-                            SetVehicleFixed(currentModVehicle)
-                            SetVehicleDeformationFixed(currentModVehicle)
-                            exports['az_notify']:ShowNotification("~g~Véhicule réparé")
+                    if weaponHash == `WEAPON_SNSPISTOL_MK2` then
+                        Items:AddSeparator("~r~You cannot modify this weapon.") 
+                        return
+                    end
+
+                    if weaponHash ~= `WEAPON_UNARMED` then
+                        local shownCount = 0
+                        for _, comp in ipairs(weaponAttachments) do
+                            local isCompatible = true
+                            if DoesWeaponTakeWeaponComponent then
+                                 isCompatible = DoesWeaponTakeWeaponComponent(weaponHash, comp.hash)
+                            end
+
+                            if isCompatible then
+                                local hasComp = HasPedGotWeaponComponent(playerPed, weaponHash, comp.hash)
+                                Items:CheckBox(comp.label, nil, hasComp, {}, function(onSelected, IsChecked)
+                                    if onSelected then
+                                        ToggleWeaponComponent(comp)
+                                    end
+                                end)
+                                shownCount = shownCount + 1
+                            end
                         end
-                    end)
-                end
-            end, function() end)
-        end
-
-        -- Submenus for Customization
-        HandleCustomizationMenus()
-
-        if RageUI.Visible(teleporterMenu) then
-            teleporterMenu:IsVisible(function(Items)
-                for _, loc in ipairs(currentNPC.locations or {}) do
-                    Items:AddButton(loc.label, nil, {RightLabel = "→"}, function(onSelected)
-                        if onSelected then
-                            RageUI.Visible(teleporterMenu, false)
-                            SetEntityCoords(PlayerPedId(), loc.coords)
-                            exports['az_notify']:ShowNotification("~g~Téléporté vers " .. loc.label)
+                        if shownCount == 0 then 
+                            Items:AddSeparator("~r~No compatible components for this weapon") 
                         end
-                    end)
-                end
-            end, function() end)
+                    else
+                        Items:AddSeparator("~r~Take out a weapon to modify it")
+                    end
+                end, function() end)
+            end
+
+            if RageUI.Visible(vehicleMenu) then
+                vehicleMenu:IsVisible(function(Items)
+                    if #bagVehicles > 0 then
+                        for _, v in ipairs(bagVehicles) do
+                            Items:AddButton(v.label, "Cliquez pour modifier (Preview)", {RightLabel = "→"}, function(onSelected)
+                                if onSelected then
+                                    currentModVehicle = v
+                                    isCustomizingBag = true
+                                    SpawnPreviewVehicle(v.name, v.mods)
+                                end
+                            end, customMenu)
+                        end
+                    else
+                        Items:AddSeparator("~r~Aucun véhicule dans votre sac")
+                    end
+                end, function() end)
+            end
+
+            if RageUI.Visible(customMenu) then
+                customMenu:IsVisible(function(Items)
+                    if not isCustomizingBag and not DoesEntityExist(currentModVehicle) then
+                        RageUI.GoBack()
+                        return
+                    end
+
+                    Items:AddButton("Couleurs", nil, {RightLabel = "→"}, function() end, colorMenu)
+                    Items:AddButton("Performances", nil, {RightLabel = "→"}, function() end, performanceMenu)
+                    Items:AddButton("Esthétique", nil, {RightLabel = "→"}, function() end, cosmeticMenu)
+                    Items:AddButton("Jantes", nil, {RightLabel = "→"}, function() end, wheelsMenu)
+                    Items:AddButton("Vitres", nil, {RightLabel = "→"}, function() end, tintMenu)
+
+                    if not isCustomizingBag then
+                        Items:AddSeparator("~b~Actions Rapides")
+                        Items:AddButton("Réparer le véhicule", nil, {RightLabel = "→"}, function(onSelected)
+                            if onSelected then
+                                SetVehicleFixed(currentModVehicle)
+                                SetVehicleDeformationFixed(currentModVehicle)
+                                exports['az_notify']:ShowNotification("~g~Véhicule réparé")
+                            end
+                        end)
+                    end
+                end, function() end)
+            end
+
+            HandleCustomizationMenus()
+
+            if RageUI.Visible(teleporterMenu) then
+                teleporterMenu:IsVisible(function(Items)
+                    for _, loc in ipairs(currentNPC.locations or {}) do
+                        Items:AddButton(loc.label, nil, {RightLabel = "→"}, function(onSelected)
+                            if onSelected then
+                                RageUI.Visible(teleporterMenu, false)
+                                SetEntityCoords(PlayerPedId(), loc.coords)
+                                exports['az_notify']:ShowNotification("~g~Téléporté vers " .. loc.label)
+                            end
+                        end)
+                    end
+                end, function() end)
+            end
         end
+        Wait(sleep)
     end
 end)
 
