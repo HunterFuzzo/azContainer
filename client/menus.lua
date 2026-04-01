@@ -318,8 +318,12 @@ Citizen.CreateThread(function()
             if RageUI.Visible(mainMenu) then
                 mainMenu:IsVisible(function(Items)
                     if currentNPC.type == 'shop' then
-                        Items:AddButton("Access the grocery", nil, {RightLabel = "→"}, function(onSelected)
-                        end, shopMenu)
+                        Items:AddButton("Access the Marketplace", "Browse player listings", {RightLabel = "→"}, function(onSelected)
+                            if onSelected then
+                                RageUI.Visible(mainMenu, false)
+                                TriggerEvent('az_inventory:openMarket')
+                            end
+                        end)
                     elseif currentNPC.type == 'weapon' then
                         Items:AddButton("Modify my weapon", nil, {RightLabel = "→"}, function(onSelected)
                         end, weaponMenu)
@@ -342,6 +346,14 @@ Citizen.CreateThread(function()
                         Items:AddButton("Teleport", nil, {RightLabel = "→"}, function(onSelected)
                         end, teleporterMenu)
                     end
+
+                    -- Global Stats/Profile Button
+                    Items:AddButton("My Statistics", "View your kills and deaths", {RightLabel = "→"}, function(onSelected)
+                        if onSelected then
+                            RageUI.Visible(mainMenu, false)
+                            TriggerEvent('az_inventory:openProfile')
+                        end
+                    end)
                 end, function() end)
             end
 
